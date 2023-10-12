@@ -36,6 +36,7 @@ iface eth0 inet static
 	address 10.36.2.2
 	netmask 255.255.255.0
 	gateway 10.36.2.1
+	up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ````
 selain itu mengikuti ethnya masing masing
 
@@ -61,33 +62,37 @@ Masukkan ini di Yudisthira
 
 Setelah itu Konfigurasi file
 ````
+nano /etc/bind/named.conf.local
+````
+
+````
 zone "arjuna.d29.com" {
         type master;
-        file "/etc/bind/jarkom-d29/arjuna.d29.com";
+        file "/etc/bind/arjuna.d29/arjuna.d29.com";
 };
 
 zone "abimanyu.d29.com" {
         type master;
-        file "/etc/bind/jarkom-d29/abimanyu.d29.com";
+        file "/etc/bind/abimanyu.d29/abimanyu.d29.com";
 };
 ````
 ##### Membuat website utama dengan akses arjuna.yyy.com
 Pada "Yudhistira" buat folder di dalam etc/bind
 ````
-mkdir /etc/bind/jarkom-d29
+mkdir /etc/bind/arjuna.d29
 ````
 Copy file db.local dan ganti nama
 ````
-cp /etc/bind/db.local /etc/bind/jarkom-d29/arjuna.d29.com
+cp /etc/bind/db.local /etc/bind/arjuna.d29/arjuna.d29.com
 ````
 
-Buka file /etc/bind/jarkom-d29/arjuna.d29.com dan tuliskan
+Buka file /etc/bind/arjuna.d29/arjuna.d29.com dan tuliskan
 ````
 ;
 ; BIND data file for local loopback interface
 ;
 \$TTL    604800
-@       IN      SOA     arjuna.d29.com. root.arjuna.d29.com. (
+@       IN      SOA     d29.com. root.d29.com. (
                         2023101001      ; Serial
                          604800         ; Refresh
                           86400         ; Retry
@@ -95,7 +100,7 @@ Buka file /etc/bind/jarkom-d29/arjuna.d29.com dan tuliskan
                          604800 )       ; Negative Cache TTL
 ;
 @       IN      NS      arjuna.d29.com.
-@       IN      A       10.36.2.2       ; IP Yudhistira 
+@       IN      A       10.36.2.4       ; IP Arjuna 
 www     IN      CNAME   arjuna.d29.com. ; Alias
 @       IN      AAAA    ::1
 ````
@@ -103,16 +108,16 @@ www     IN      CNAME   arjuna.d29.com. ; Alias
 ##### Membuat website utama dengan akses abimanyu.yyy.com
 Copy file db.local dan ganti nama
 ````
-cp /etc/bind/db.local /etc/bind/jarkom-d29/abimanyu.d29.com
+cp /etc/bind/db.local /etc/bind/abimanyu.d29/abimanyu.d29.com
 ````
 
-Buka file /etc/bind/jarkom-d29/abimanyu.d29.com dan tuliskan
+Buka file /etc/bind/abimanyu.d29/abimanyu.d29.com dan tuliskan
 ````
 ;
 ; BIND data file for local loopback interface
 ;
 \$TTL    604800
-@       IN      SOA     abimanyu.d29.com. root.abimanyu.d29.com. (
+@       IN      SOA     d29.com. root.d29.com. (
                         2023101001      ; Serial
                          604800         ; Refresh
                           86400         ; Retry
@@ -120,7 +125,7 @@ Buka file /etc/bind/jarkom-d29/abimanyu.d29.com dan tuliskan
                          604800 )       ; Negative Cache TTL
 ;
 @       IN      NS      abimanyu.d29.com.
-@       IN      A       10.36.2.2       ; IP Yudhistira 
+@       IN      A       10.36.1.4         ; IP Abimanyu 
 www     IN      CNAME   abimanyu.d29.com. ; Alias
 @       IN      AAAA    ::1
 ````
@@ -137,13 +142,13 @@ dan berikut hasilnya
 ## Soal No 4
 Kemudian, karena terdapat beberapa web yang harus di-deploy, buatlah subdomain parikesit.abimanyu.yyy.com yang diatur DNS-nya di Yudhistira dan mengarah ke Abimanyu.
 ##### Membuat Subdomain "parikesit.abimanyu.yyy.com"
-Buka file /etc/bind/jarkom-d29/abimanyu.d29.com pada Yudhistira
+Buka file /etc/bind/abimanyu.d29/abimanyu.d29.com pada Yudhistira
 ````
 ;
 ; BIND data file for local loopback interface
 ;
 \$TTL    604800
-@       IN      SOA     abimanyu.d29.com. root.abimanyu.d29.com. (
+@       IN      SOA     d29.com. root.d29.com. (
                         2023101001      ; Serial
                          604800         ; Refresh
                           86400         ; Retry
@@ -151,10 +156,9 @@ Buka file /etc/bind/jarkom-d29/abimanyu.d29.com pada Yudhistira
                          604800 )       ; Negative Cache TTL
 ;
 @             IN      NS      abimanyu.d29.com.
-@             IN      A       10.36.2.2                   ; IP Yudhistira 
+@             IN      A       10.36.1.4                   ; IP Abimanyu 
 www           IN      CNAME   abimanyu.d29.com.           ; Alias
-abimanyu      IN      A       10.36.1.4                   ; IP Abimanyu
-www.abimanyu  IN      CNAME   parikesit.abimanyu.d29.com. ; Alias
+parikesit     IN      A	      10.36.1.4			  ; IP Abimanyu
 @             IN      AAAA    ::1
 ````
 
@@ -167,8 +171,42 @@ dan coba ping untuk melihat apakah berhasil atau tidak
 
 ## Soal No 5
 Buat juga reverse domain untuk domain utama. (Abimanyu saja yang direverse)
+buka terlebih dahulu file etc/bind/named.conf.local
+````
+nano /etc/bind/named.conf.local
+````
 
+masukkan didalam file tersebut
+````
+zone "1.36.10.in-addr.arpa" { 
+    type master;
+    file "/etc/bind/1.36.10.in-addr/1.36.10.in-addr.arpa";
+};
+````
 
+Coppy filenya
+````
+cp /etc/bind/db.local /etc/bind/1.36.10.in-addr/1.36.10.in-addr.arpa
+````
 
-
+Buka dan edit file /etc/bind/jarkom-d29/1.36.10.in-addr.arpa menjadi seperti ini
+````
+;
+; BIND data file for local loopback interface
+;
+\$TTL    604800
+@       IN      SOA     d29.com. root.d29.com. (
+			2023101001      ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+1.36.10.in-addr.arpa.   IN      NS      abimanyu.d29.com.
+4                       IN      PTR     abimanyu.d29.com. ; Byte ke-4 abimanyu
+````
+lalu restart bind9
+````
+service bind9 restart
+````
 
